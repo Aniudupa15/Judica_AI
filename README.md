@@ -46,7 +46,7 @@ Judica integrates with multiple APIs to deliver a seamless experience:
 
 <p align="center">
   <img src="screenshots/Splash_Screen.png" alt="Splash Screen" width="200"/>
-  <img src="screenshots/Register_Page.jpeg" alt="Register Screen" width="200"/>
+  <img src="screenshots/Register_Page.png" alt="Register Screen" width="200"/>
   <img src="screenshots/Login_Page.png" alt="Login Screen" width="200"/>
 </p>
 
