@@ -44,15 +44,15 @@ Judica integrates with multiple APIs to deliver a seamless experience:
 
 | Feature                | Screenshot                                                                                       |
 |------------------------|--------------------------------------------------------------------------------------------------|
-| **Splash Screen**         | ![Home Screen](screenshots\Splash_Screen.png)                                                 |
-| **Register Screen**         | ![Home Screen](screenshots\Register_Page.jpeg)                                                  |
-| **Login Screen**         | ![Home Screen](screenshots\Login_Page.png)                                                      |
-| **Law Chatbot**         | ![Law Chatbot](screenshots\LawChat_Screen.png)                                                  |
-| **FIR Generation**      | ![FIR Generation](screenshots\Generate_FIR.png)                                                 |
-| **View Generated FIR**      | ![Bail Predictor](screenshots\View_Fir.png)                                                     |
-| **Bail Predictor**      | ![Bail Predictor](screenshots\Bail_Page.png)                                                    |
-| **Predicted Bail**     | ![Profile Section](screenshots\Bail_Predicted.png)                                              |
-| **Profile Section**     | ![Profile Section](screenshots\Profile_Page.png)                                                |
+| **Splash Screen**         | ![Home Screen](screenshots/Splash_Screen.png)                                                 |
+| **Register Screen**         | ![Home Screen](screenshots/Register_Page.jpeg)                                                  |
+| **Login Screen**         | ![Home Screen](screenshots/Login_Page.png)                                                      |
+| **Law Chatbot**         | ![Law Chatbot](screenshots/LawChat_Screen.png)                                                  |
+| **FIR Generation**      | ![FIR Generation](screenshots/Generate_FIR.png)                                                 |
+| **View Generated FIR**      | ![Bail Predictor](screenshots/View_Fir.png)                                                     |
+| **Bail Predictor**      | ![Bail Predictor](screenshots/Bail_Page.png)                                                    |
+| **Predicted Bail**     | ![Profile Section](screenshots/Bail_Predicted.png)                                              |
+| **Profile Section**     | ![Profile Section](screenshots/Profile_Page.png)                                                |
 
 To view all screenshots in detail, check the `/screenshots` folder in the repository.
 
