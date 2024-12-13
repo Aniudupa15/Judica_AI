@@ -42,17 +42,25 @@ Judica integrates with multiple APIs to deliver a seamless experience:
 
 ## 🎨 Screenshots
 
-| Feature                | Screenshot                                                                                       |
-|------------------------|--------------------------------------------------------------------------------------------------|
-| **Splash Screen**         | ![Home Screen](screenshots/Splash_Screen.png)                                                 |
-| **Register Screen**         | ![Home Screen](screenshots/Register_Page.jpeg)                                                  |
-| **Login Screen**         | ![Home Screen](screenshots/Login_Page.png)                                                      |
-| **Law Chatbot**         | ![Law Chatbot](screenshots/LawChat_Screen.png)                                                  |
-| **FIR Generation**      | ![FIR Generation](screenshots/Generate_FIR.png)                                                 |
-| **View Generated FIR**      | ![Bail Predictor](screenshots/View_Fir.png)                                                     |
-| **Bail Predictor**      | ![Bail Predictor](screenshots/Bail_Page.png)                                                    |
-| **Predicted Bail**     | ![Profile Section](screenshots/Bail_Predicted.png)                                              |
-| **Profile Section**     | ![Profile Section](screenshots/Profile_Page.png)                                                |
+### App Screens
+
+<p align="center">
+  <img src="screenshots/Splash_Screen.png" alt="Splash Screen" width="200"/>
+  <img src="screenshots/Register_Page.jpeg" alt="Register Screen" width="200"/>
+  <img src="screenshots/Login_Page.png" alt="Login Screen" width="200"/>
+</p>
+
+<p align="center">
+  <img src="screenshots/LawChat_Screen.png" alt="Law Chatbot" width="200"/>
+  <img src="screenshots/Generate_FIR.png" alt="FIR Generation" width="200"/>
+  <img src="screenshots/View_Fir.png" alt="View Generated FIR" width="200"/>
+</p>
+
+<p align="center">
+  <img src="screenshots/Bail_Page.png" alt="Bail Predictor" width="200"/>
+  <img src="screenshots/Bail_Predicted.png" alt="Predicted Bail" width="200"/>
+  <img src="screenshots/Profile_Page.png" alt="Profile Section" width="200"/>
+</p>
 
 To view all screenshots in detail, check the `/screenshots` folder in the repository.
 
