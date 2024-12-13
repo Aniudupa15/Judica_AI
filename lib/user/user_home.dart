@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:judica/common_pages/chat_bot.dart';
 import 'package:judica/common_pages/profile.dart';
-import 'package:judica/common_pages/slpash_screen.dart';
+import 'package:judica/user/chat_bot_user.dart';
 
 class UserHome extends StatefulWidget {
   const UserHome({super.key});
@@ -18,7 +17,7 @@ class _UserHomeState extends State<UserHome> {
 
   // Define the pages for navigation
   static final List<Widget> _pages = <Widget>[
-    ChatScreen(), // ChatBot Page
+    const ChatScreenUser(), // ChatBot Page
     const ProfilePage(), // Profile Page
   ];
 

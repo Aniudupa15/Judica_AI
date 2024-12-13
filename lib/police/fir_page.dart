@@ -1,12 +1,18 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:open_file/open_file.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:io';
 
 class FirComponent extends StatefulWidget {
+  const FirComponent({super.key});
+
   @override
   _FirComponentState createState() => _FirComponentState();
 }
@@ -35,6 +41,8 @@ class _FirComponentState extends State<FirComponent> with SingleTickerProviderSt
 
   // Function to handle FIR generation request
   Future<void> generateFIR() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
       isLoading = true;
     });
@@ -144,21 +152,109 @@ class _FirComponentState extends State<FirComponent> with SingleTickerProviderSt
     }
   }
 
-  // Function to download FIR PDF
-  Future<String> _downloadPDF(String url) async {
-    final response = await http.get(Uri.parse(url));
-    final bytes = response.bodyBytes;
+  Future<bool> requestStoragePermission() async {
+    if (Platform.isAndroid) {
+      // For Android 13 (API level 33) and above
+      if (await Permission.storage.isGranted) return true;
 
-    final dir = await getExternalStorageDirectory();
-    final file = File('${dir!.path}/fir_${DateTime.now().millisecondsSinceEpoch}.pdf');
-    await file.writeAsBytes(bytes);
+      // Request multiple permissions for Android
+      final Map<Permission, PermissionStatus> statuses = await [
+        Permission.storage,
+        Permission.manageExternalStorage,
+      ].request();
 
-    return file.path;
+      // Check if any required permissions are granted
+      return statuses[Permission.storage] == PermissionStatus.granted ||
+          statuses[Permission.manageExternalStorage] == PermissionStatus.granted;
+    }
+
+    // For iOS, storage permissions are handled differently
+    if (Platform.isIOS) {
+      return await Permission.photos.request().isGranted;
+    }
+
+    return false;
   }
 
-  // Function to share FIR PDF
-  Future<void> _sharePDF(String url) async {
+  // Updated download function
+  Future<String?> _downloadPDFToExternal(String url) async {
+    try {
+      // Request storage permission
+      bool permissionGranted = await requestStoragePermission();
 
+      if (!permissionGranted) {
+        _showErrorDialog('Storage permission is required to download files.');
+        return null;
+      }
+
+      // Determine appropriate download directory
+      Directory? downloadDir;
+      if (Platform.isAndroid) {
+        downloadDir = await getExternalStorageDirectory();
+      } else if (Platform.isIOS) {
+        downloadDir = await getApplicationDocumentsDirectory();
+      }
+
+      if (downloadDir == null) {
+        _showErrorDialog('Could not access download directory');
+        return null;
+      }
+
+      // Generate unique filename
+      final String fileName = 'FIR_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final String filePath = '${downloadDir.path}/$fileName';
+
+      // Download file
+      Dio dio = Dio();
+      await dio.download(url, filePath);
+
+      // Show success message with open option
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('FIR downloaded to: $filePath'),
+          action: SnackBarAction(
+            label: 'Open',
+            onPressed: () async {
+              // Open the downloaded file
+              final result = await OpenFile.open(filePath);
+
+              // Check the result of opening the file
+              switch (result.type) {
+                case ResultType.done:
+                  print('File opened successfully');
+                  break;
+                case ResultType.error:
+                  _showErrorDialog('Failed to open file: ${result.message}');
+                  break;
+                default:
+                  print('File open result: ${result.type}');
+              }
+            },
+          ),
+        ),
+      );
+
+      // Return the file path for sharing
+      return filePath;
+    } catch (e) {
+      _showErrorDialog('Download failed: ${e.toString()}');
+      return null;
+    }
+  }
+
+  // Function to share the FIR PDF
+  Future<void> _sharePDF(String url) async {
+    try {
+      // Download the file first
+      final filePath = await _downloadPDFToExternal(url);
+
+      if (filePath != null) {
+        // Share the downloaded file
+        await Share.shareXFiles([XFile(filePath)], text: 'FIR Document');
+      }
+    } catch (e) {
+      _showErrorDialog('Share failed: ${e.toString()}');
+    }
   }
 
   @override
@@ -189,33 +285,39 @@ class _FirComponentState extends State<FirComponent> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Generate FIR'),
-            Tab(text: 'View FIRs'),
-          ],
-          labelColor: Colors.orange, // Active tab label color
-          unselectedLabelColor: Colors.black, // Inactive tab label color
-          indicatorColor: Colors.blue, // Indicator color
-          indicatorWeight: 4.0, // Indicator height
-          indicatorPadding: const EdgeInsets.symmetric(horizontal: 16.0), // Adjust tab indicator width
-      ),
-
       body: Stack(
         children: [
           // Background Image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/ChatBotBackground.jpg', // Add your background image here
-              fit: BoxFit.cover,
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/ChatBotBackground.jpg"), // Add your image path here
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          TabBarView(
-            controller: _tabController,
+          // Content with TabBar
+          Column(
             children: [
-              _buildGenerateFIRForm(),
-              _buildFIRListView(),
+              TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Generate FIR'),
+                  Tab(text: 'View FIRs'),
+                ],
+                labelColor: Colors.orange, // Active tab label color
+                unselectedLabelColor: Colors.black, // Inactive tab label color
+                indicatorColor: Colors.blue, // Indicator color
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildGenerateFIRForm(),
+                    _buildFIRListView(),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -258,7 +360,7 @@ class _FirComponentState extends State<FirComponent> with SingleTickerProviderSt
                 onPressed: generateFIR,
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Generate FIR',style:TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),),
+                    : const Text('Generate FIR', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -276,8 +378,8 @@ class _FirComponentState extends State<FirComponent> with SingleTickerProviderSt
         decoration: InputDecoration(
           labelText: labelText,
           filled: true,
-          fillColor: Colors.white.withOpacity(0.7), // Transparency
-          border: OutlineInputBorder(),
+          fillColor: Colors.white.withOpacity(0.7),
+          border: const OutlineInputBorder(),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -297,35 +399,27 @@ class _FirComponentState extends State<FirComponent> with SingleTickerProviderSt
     return ListView.builder(
       itemCount: firList.length,
       itemBuilder: (context, index) {
-        final fir = firList[index];
-        final downloadUrl = fir['url'];
+        final firData = firList[index].data() as Map<String, dynamic>;
+        final firId = firList[index].id;
+        final downloadUrl = firData['url'];
 
         return ListTile(
-          title: const Text('FIR'),
-          subtitle: Text('Generated on: ${fir['generated_at']}'),
-          onTap: () async {
-            final filePath = await _downloadPDF(downloadUrl);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PDFViewPage(filePath: filePath),
-              ),
-            );
-          },
+          title: Text('FIR #$firId'),
+          subtitle: Text('Generated at: ${firData['generated_at']}'),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              IconButton(
+                icon: const Icon(Icons.download),
+                onPressed: () => _downloadPDFToExternal(downloadUrl),
+              ),
               IconButton(
                 icon: const Icon(Icons.share),
                 onPressed: () => _sharePDF(downloadUrl),
               ),
               IconButton(
-                icon: const Icon(Icons.download),
-                onPressed: () => _downloadPDF(downloadUrl),
-              ),
-              IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () => _deleteFIR(fir.id),
+                onPressed: () => _deleteFIR(firId),
               ),
             ],
           ),
@@ -334,16 +428,36 @@ class _FirComponentState extends State<FirComponent> with SingleTickerProviderSt
     );
   }
 }
+// KeepAliveWidget to maintain state across tabs
+class KeepAliveWidget extends StatefulWidget {
+  final Widget child;
+
+  const KeepAliveWidget({super.key, required this.child});
+
+  @override
+  _KeepAliveWidgetState createState() => _KeepAliveWidgetState();
+}
+
+class _KeepAliveWidgetState extends State<KeepAliveWidget> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+}
 
 class PDFViewPage extends StatelessWidget {
   final String filePath;
 
-  const PDFViewPage({required this.filePath});
+  const PDFViewPage({super.key, required this.filePath});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('View FIR')),
+      appBar: AppBar(title: const Text('View FIR PDF')),
       body: PDFView(
         filePath: filePath,
       ),

@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:judica/Judge/bail_page.dart';
-import 'package:judica/common_pages/chat_bot.dart';
 import 'package:judica/common_pages/profile.dart';
-import 'package:judica/common_pages/slpash_screen.dart';
+import 'package:judica/police/chat_bot_police.dart';
 import 'fir_page.dart'; // Import your FIR page
 
 class PoliceHome extends StatefulWidget {
@@ -21,7 +19,7 @@ class _PoliceHomeState extends State<PoliceHome> {
   // Define the pages for navigation
   static final List<Widget> _pages = <Widget>[
     FirComponent(), // FIR-related component
-    ChatScreen(), // ChatBot Page
+    const ChatScreenPolice(), // ChatBot Page
     const ProfilePage(), // Profile Page
   ];
 

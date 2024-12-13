@@ -12,7 +12,7 @@ class Bailpage extends StatefulWidget {
 
 class _BailpageState extends State<Bailpage> {
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false; // Loading state
+  bool _isLoading = false;
 
   // Form fields
   String? statute;
@@ -47,16 +47,14 @@ class _BailpageState extends State<Bailpage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Gradient
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/ChatBotBackground.jpg'), // Add your background image here
+                image: AssetImage('assets/ChatBotBackground.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          // Content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Form(
@@ -67,8 +65,6 @@ class _BailpageState extends State<Bailpage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Form Title
-                        const Center(),
                         const SizedBox(height: 20),
                         _buildDropdown('Statute', statutes, statute, (value) {
                           setState(() => statute = value);
@@ -97,9 +93,7 @@ class _BailpageState extends State<Bailpage> {
                         const SizedBox(height: 16),
                         _buildYesNoDropdown('Fines Applicable', (value) => finesApplicable = value),
                         const SizedBox(height: 16),
-                        _buildYesNoDropdown('Served Half Term (0 or 1)', (value) => servedHalfTerm = value),
-                        const SizedBox(height: 16),
-                        _buildYesNoDropdown('Bail Eligibility (0 or 1)', (value) => bailEligibility = value),
+                        _buildYesNoDropdown('Served Half Term', (value) => servedHalfTerm = value),
                         const SizedBox(height: 16),
                         _buildNumericInput(
                           'Risk Score',
@@ -111,7 +105,6 @@ class _BailpageState extends State<Bailpage> {
                               (value) => penaltySeverity = double.tryParse(value),
                         ),
                         const SizedBox(height: 16),
-                        // Submit Button
                         ElevatedButton(
                           onPressed: _isLoading ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
@@ -130,7 +123,6 @@ class _BailpageState extends State<Bailpage> {
                       ],
                     ),
                   ),
-                  // Loading Indicator
                   if (_isLoading)
                     Positioned.fill(
                       child: Container(
@@ -196,7 +188,7 @@ class _BailpageState extends State<Bailpage> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true); // Show loading
+      setState(() => _isLoading = true);
       _formKey.currentState!.save();
 
       final payload = {
@@ -210,77 +202,59 @@ class _BailpageState extends State<Bailpage> {
         'personal_bond_required': personalBondRequired,
         'fines_applicable': finesApplicable,
         'served_half_term': servedHalfTerm,
-        'bail_eligibility': bailEligibility,
         'risk_score': riskScore,
         'penalty_severity': penaltySeverity,
       };
 
       const apiUrl = 'https://bail.onrender.com/predict-bail';
       try {
-        final postResponse = await http.post(
+        final response = await http.post(
           Uri.parse(apiUrl),
           headers: {'Content-Type': 'application/json'},
           body: json.encode(payload),
         );
 
-        if (postResponse.statusCode == 200) {
-          final postResponseData = json.decode(postResponse.body);
-          _showResponseDialog({...postResponseData});
+        if (response.statusCode == 200) {
+          final responseData = json.decode(response.body);
+          _showResponseDialog(responseData);
         } else {
-          _showResponseDialog({'Error': 'POST request failed'});
+          _showResponseDialog({'Error': 'Failed to get response.'});
         }
       } catch (e) {
-        _showResponseDialog({'Error': 'An error occurred: $e'});
+        _showResponseDialog({'Error': e.toString()});
       } finally {
-        setState(() => _isLoading = false); // Hide loading
+        setState(() => _isLoading = false);
       }
     }
   }
 
   void _showResponseDialog(Map<String, dynamic> response) {
-    // Check the response for bail-related data
-    bool isBailGranted = response['Eligible for Bail'] == 1;
-
-    String lottieAsset = isBailGranted
-        ? 'assets/no_bail.json' // Lottie file for bail
-        : 'assets/bail.json'; // Lottie file for no bail
+    final isBailGranted = response['Eligible for Bail'] == 1;
+    final lottieAsset = isBailGranted ? 'assets/bail.json' : 'assets/no_bail.json';
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Bail Prediction', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(isBailGranted ? 'Bail Granted' : 'Bail Denied'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Lottie Animation based on Bail Eligibility
-              Lottie.asset(
-                lottieAsset,
-                width: 100,
-                height: 100,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(height: 16),
-              // Display the response data
+              Lottie.asset(lottieAsset, height: 150),
+              const SizedBox(height: 20),
               ...response.entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text(
-                    'Prediction: ${entry.value}',
-                    style: TextStyle(fontSize: 16, color: Colors.black87),
-                  ),
-                );
+                return Text('${entry.key}: ${entry.value}');
               }).toList(),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

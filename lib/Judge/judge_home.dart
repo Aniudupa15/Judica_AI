@@ -2,10 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:judica/Judge/bail_page.dart';
-import 'package:judica/common_pages/chat_bot.dart';
+import 'package:judica/Judge/chat_bot_judge.dart';
 import 'package:judica/common_pages/profile.dart';
-import 'package:judica/common_pages/slpash_screen.dart';
-import '../police/fir_page.dart'; // Import your FIR page
+
 
 class AdvocateHome extends StatefulWidget {
   const AdvocateHome({super.key});
@@ -21,7 +20,7 @@ class _UserHomeState extends State<AdvocateHome> {
   // Define the pages for navigation
   static final List<Widget> _pages = <Widget>[
     const Bailpage(), // FIR-related component
-    ChatScreen(), // Placeholder for Home Page
+    const ChatScreenJudge(), // Placeholder for Home Page
     const ProfilePage(), // Profile Page
   ];
 
@@ -80,7 +79,7 @@ class _UserHomeState extends State<AdvocateHome> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment), // Updated icon for FIR
-            label: 'FIR',
+            label: 'Bail',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),

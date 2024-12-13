@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences // Import share package
-import 'lawgpt_service.dart';
-import 'dart:convert'; // For encoding/decoding chat history to/from JSON
+import 'dart:convert';
 
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+import '../common_pages/lawgpt_service.dart'; // For encoding/decoding chat history to/from JSON
+
+class ChatScreenJudge extends StatefulWidget {
+  const ChatScreenJudge({super.key});
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  _ChatScreenJudgeState createState() => _ChatScreenJudgeState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenJudgeState extends State<ChatScreenJudge> {
   final LawGPTService service = LawGPTService();
   final TextEditingController controller = TextEditingController();
   bool isLoading = false; // Indicate loading state
@@ -90,7 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void shareMessage(int index) {
     final entry = chatHistory[index];
     final message = "You: ${entry['question']}\nLawGPT: ${entry['answer']}";
-    // Share.share(message); // Share the message content
+    Share.share(message); // Now properly importing and using share functionality
   }
 
   @override
