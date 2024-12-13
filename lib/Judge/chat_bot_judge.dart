@@ -183,6 +183,9 @@ class _ChatScreenState extends State<ChatScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+                        onSubmitted: (value) {
+                          askQuestion();
+                        },
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -194,6 +197,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ],
                 ),
               ),
+
             ],
           ),
         ],
